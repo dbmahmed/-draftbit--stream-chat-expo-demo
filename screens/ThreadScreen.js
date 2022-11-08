@@ -3,10 +3,10 @@ import { ScreenContainer } from "@draftbit/ui";
 import { Chat, Channel, Thread } from "stream-chat-expo";
 import { View } from "react-native";
 import { useHeaderHeight } from "@react-navigation/stack";
-import { AppContext, streami18n, chatClient } from "../custom-files/CustomCode";
+import { AppContext, streami18n } from "../custom-files/CustomCode";
 
 const ThreadScreen = () => {
-  const { channel, setThread, thread } = useContext(AppContext);
+  const { channel, setThread, thread, chatClient } = useContext(AppContext);
   const headerHeight = useHeaderHeight();
 
   return (

@@ -1,11 +1,8 @@
 // import * as React from 'react';
-import React, { useState, useEffect } from "react";
-// import { I18nManager, Platform, StyleSheet, Text, View } from 'react-native';
-// import { systemWeights } from 'react-native-typography';
-// import { Icon, Touchable } from '@draftbit/ui';
+import React, { useState } from "react";
+import { useChatClient } from "./custom-files/useChatClient.js";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-
 import LinkingConfiguration from "./LinkingConfiguration.js";
 
 import ChannelListScreen from "./screens/ChannelListScreen";
@@ -14,32 +11,21 @@ import ThreadScreen from "./screens/ThreadScreen";
 import { OverlayProvider } from "stream-chat-expo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import {
-  AppContext,
-  chatClient,
-  user,
-  userToken,
-  streami18n,
-} from "./custom-files/CustomCode";
+import { AppContext, streami18n } from "./custom-files/CustomCode";
 import { useStreamChatTheme } from "./useStreamChatTheme.js";
+import UserSelectorScreen from "./screens/UserSelectorScreen.js";
+import LoadingScreen from "./screens/LoadingScreen.js";
 
 const Stack = createStackNavigator();
 
 function StackNavigator() {
+  const { chatClient, isConnecting, loginUser, logout, switchUser } =
+    useChatClient();
+  // console.log(chatClient);
   const theme = useStreamChatTheme();
   const [channel, setChannel] = useState();
-  const [clientReady, setClientReady] = useState(false);
   const { bottom } = useSafeAreaInsets();
   const [thread, setThread] = useState();
-  useEffect(() => {
-    const setupClient = async () => {
-      await chatClient.connectUser(user, userToken);
-
-      setClientReady(true);
-    };
-
-    setupClient();
-  }, []);
 
   return (
     <OverlayProvider
@@ -48,9 +34,30 @@ function StackNavigator() {
       translucentStatusBar
       value={{ style: theme }}
     >
-      <AppContext.Provider value={{ channel, setChannel, setThread, thread }}>
-        {clientReady && (
-          <Stack.Navigator initialRouteName="ChannelListScreen">
+      <AppContext.Provider
+        value={{
+          channel,
+          setChannel,
+          setThread,
+          chatClient,
+          switchUser,
+          loginUser,
+          logout,
+          thread,
+        }}
+      >
+        <Stack.Navigator
+          initialRouteName={
+            isConnecting
+              ? "LoadingScreen"
+              : chatClient
+              ? "ChannelListScreen"
+              : "UserSelectorScreen"
+          }
+        >
+          {isConnecting ? (
+            <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
+          ) : chatClient ? (
             <Stack.Screen
               name="ChannelListScreen"
               component={ChannelListScreen}
@@ -60,18 +67,25 @@ function StackNavigator() {
                 title: "ChannelList",
               }}
             />
+          ) : (
             <Stack.Screen
-              name="ThreadScreen"
-              component={ThreadScreen}
-              options={{ title: "Thread" }}
+              name="UserSelectorScreen"
+              component={UserSelectorScreen}
+              options={{ gestureEnabled: false, headerShown: false }}
             />
-            <Stack.Screen
-              name="ChannelScreen"
-              component={ChannelScreen}
-              options={{ title: "Channel" }}
-            />
-          </Stack.Navigator>
-        )}
+          )}
+
+          <Stack.Screen
+            name="ThreadScreen"
+            component={ThreadScreen}
+            options={{ title: "Thread" }}
+          />
+          <Stack.Screen
+            name="ChannelScreen"
+            component={ChannelScreen}
+            options={{ title: "Channel" }}
+          />
+        </Stack.Navigator>
       </AppContext.Provider>
     </OverlayProvider>
   );

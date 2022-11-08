@@ -10,10 +10,10 @@ import {
   MessageList,
   MessageInput,
 } from "stream-chat-expo";
-import { chatClient, streami18n } from "../custom-files/CustomCode";
+import { streami18n } from "../custom-files/CustomCode";
 
 const ChannelScreen = ({ navigation }) => {
-  const { channel, setThread, thread } = useContext(AppContext);
+  const { channel, setThread, thread, chatClient } = useContext(AppContext);
   const headerHeight = useHeaderHeight();
   const { setTopInset } = useAttachmentPickerContext();
 

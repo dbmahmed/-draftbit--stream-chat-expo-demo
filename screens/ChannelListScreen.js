@@ -1,6 +1,6 @@
 import { useContext, useMemo } from "react";
 import { View } from "react-native";
-import { ScreenContainer } from "@draftbit/ui";
+import { ScreenContainer, Icon, Touchable } from "@draftbit/ui";
 
 import { ChannelList, Chat } from "stream-chat-expo";
 import {
@@ -8,21 +8,26 @@ import {
   options,
   AppContext,
   filters,
-  chatClient,
   streami18n,
 } from "../custom-files/CustomCode";
 
 const ChannelListScreen = ({ navigation }) => {
-  const { setChannel } = useContext(AppContext);
+  const { setChannel, chatClient, logout } = useContext(AppContext);
+  if (!chatClient) return null;
 
-  const memoizedFilters = useMemo(() => filters, []);
+  // const memoizedFilters = useMemo(() => filters, []);
 
   return (
     <ScreenContainer hasSafeArea={false} scrollable={false}>
+      <View style={{ width: "100%", alignItems: "center" }}>
+        <Touchable onPress={logout}>
+          <Icon size={24} name={"Entypo/log-out"} />
+        </Touchable>
+      </View>
       <Chat client={chatClient} i18nInstance={streami18n}>
         <View style={{ height: "100%" }}>
           <ChannelList
-            filters={memoizedFilters}
+            // filters={memoizedFilters}
             onSelect={(channel) => {
               setChannel(channel);
               navigation.navigate("ChannelScreen");
